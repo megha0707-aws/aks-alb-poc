@@ -9,19 +9,6 @@ resource "azurerm_application_load_balancer" "alb" {
   location            = azurerm_resource_group.alb_rg.location
 }
 
-resource "kubernetes_namespace" "alb" {
-  metadata {
-    name = "azure-alb-system"
-  }
-}
-
-resource "helm_release" "alb_controller" {
-  name       = "alb-controller"
-  namespace  = kubernetes_namespace.alb.metadata[0].name
-  repository = "oci://mcr.microsoft.com/application-lb/charts"
-  chart      = "alb-controller"
-}
-
 resource "kubernetes_deployment" "nginx" {
   metadata {
     name = "sample-web"

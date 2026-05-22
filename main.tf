@@ -1,8 +1,3 @@
-data "azurerm_application_load_balancer" "existing_alb" {
-  name                = "alb-poc"
-  resource_group_name = "rg-alb-poc"
-}
-
 resource "kubernetes_deployment" "nginx" {
   metadata {
     name = "sample-web"
@@ -62,7 +57,7 @@ resource "kubernetes_ingress_v1" "nginx_ingress" {
     name = "sample-web-ingress"
 
     annotations = {
-      "alb.networking.azure.io/alb-id" = data.azurerm_application_load_balancer.existing_alb.id
+      "alb.networking.azure.io/alb-id" = "/subscriptions/91ea5a42-5e9b-4c0c-a766-ea2a2aaa3ace/resourceGroups/rg-alb-poc/providers/Microsoft.ServiceNetworking/trafficControllers/alb-poc"
     }
   }
 

@@ -1,7 +1,6 @@
-resource "azurerm_application_load_balancer" "alb" {
+data "azurerm_application_load_balancer" "existing_alb" {
   name                = "alb-poc"
   resource_group_name = "rg-alb-poc"
-  location            = "East US"
 }
 
 resource "kubernetes_deployment" "nginx" {
@@ -63,7 +62,7 @@ resource "kubernetes_ingress_v1" "nginx_ingress" {
     name = "sample-web-ingress"
 
     annotations = {
-      "alb.networking.azure.io/alb-id" = azurerm_application_load_balancer.alb.id
+      "alb.networking.azure.io/alb-id" = data.azurerm_application_load_balancer.existing_alb.id
     }
   }
 

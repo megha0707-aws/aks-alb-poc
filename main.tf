@@ -1,12 +1,7 @@
-resource "azurerm_resource_group" "alb_rg" {
-  name     = "rg-alb-poc"
-  location = "East US"
-}
-
 resource "azurerm_application_load_balancer" "alb" {
   name                = "alb-poc"
-  resource_group_name = azurerm_resource_group.alb_rg.name
-  location            = azurerm_resource_group.alb_rg.location
+  resource_group_name = "rg-alb-poc"
+  location            = "East US"
 }
 
 resource "kubernetes_deployment" "nginx" {

@@ -45,7 +45,8 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 
   network_profile {
-    network_plugin = "azure"
-    network_policy = "azure"
-  }
+  network_plugin = "azure"
+  network_policy = "azure"
+  service_cidr   = var.service_cidr
+  dns_service_ip = var.dns_service_ip
 }

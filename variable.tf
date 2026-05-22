@@ -45,3 +45,10 @@ variable "node_count" {
 variable "vm_size" {
   type = string
 }
+variable "service_cidr" {
+  type = string
+}
+
+variable "dns_service_ip" {
+  type = string
+}

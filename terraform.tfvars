@@ -26,3 +26,5 @@ dns_prefix = "aksalb"
 node_count = 1
 
 vm_size = "Standard_D2s_v3"
+service_cidr   = "172.16.0.0/16"
+dns_service_ip = "172.16.0.10"

@@ -1,3 +1,14 @@
+resource "azurerm_resource_group" "alb_rg" {
+  name     = "rg-alb-poc"
+  location = "East US"
+}
+
+resource "azurerm_application_load_balancer" "alb" {
+  name                = "alb-poc"
+  resource_group_name = azurerm_resource_group.alb_rg.name
+  location            = azurerm_resource_group.alb_rg.location
+}
+
 resource "kubernetes_namespace" "alb" {
   metadata {
     name = "azure-alb-system"
@@ -68,6 +79,10 @@ resource "kubernetes_service" "nginx" {
 resource "kubernetes_ingress_v1" "nginx_ingress" {
   metadata {
     name = "sample-web-ingress"
+
+    annotations = {
+      "alb.networking.azure.io/alb-id" = azurerm_application_load_balancer.alb.id
+    }
   }
 
   spec {

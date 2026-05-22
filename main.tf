@@ -1,53 +1,95 @@
-resource "azurerm_resource_group" "rg" {
-  name     = var.resource_group_name
-  location = var.location
+resource "kubernetes_namespace" "alb" {
+  metadata {
+    name = "azure-alb-system"
+  }
 }
 
-resource "azurerm_virtual_network" "vnet" {
-  name                = var.vnet_name
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-  address_space       = var.vnet_address_space
+resource "helm_release" "alb_controller" {
+  name       = "alb-controller"
+  namespace  = kubernetes_namespace.alb.metadata[0].name
+  repository = "oci://mcr.microsoft.com/application-lb/charts"
+  chart      = "alb-controller"
 }
 
-resource "azurerm_subnet" "aks_subnet" {
-  name                 = var.aks_subnet_name
-  resource_group_name  = azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = var.aks_subnet_prefix
-}
-
-resource "azurerm_subnet" "alb_subnet" {
-  name                 = var.alb_subnet_name
-  resource_group_name  = azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = var.alb_subnet_prefix
-}
-
-resource "azurerm_kubernetes_cluster" "aks" {
-  name                = var.aks_cluster_name
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-  dns_prefix          = var.dns_prefix
-
-  oidc_issuer_enabled       = true
-  workload_identity_enabled = true
-
-  default_node_pool {
-    name           = "system"
-    node_count     = var.node_count
-    vm_size        = var.vm_size
-    vnet_subnet_id = azurerm_subnet.aks_subnet.id
+resource "kubernetes_deployment" "nginx" {
+  metadata {
+    name = "sample-web"
   }
 
-  identity {
-    type = "SystemAssigned"
+  spec {
+    replicas = 1
+
+    selector {
+      match_labels = {
+        app = "sample-web"
+      }
+    }
+
+    template {
+      metadata {
+        labels = {
+          app = "sample-web"
+        }
+      }
+
+      spec {
+        container {
+          name  = "nginx"
+          image = "nginx"
+
+          port {
+            container_port = 80
+          }
+        }
+      }
+    }
+  }
+}
+
+resource "kubernetes_service" "nginx" {
+  metadata {
+    name = "sample-web-service"
   }
 
-  network_profile {
-    network_plugin = "azure"
-    network_policy = "azure"
-    service_cidr   = var.service_cidr
-    dns_service_ip = var.dns_service_ip
+  spec {
+    selector = {
+      app = "sample-web"
+    }
+
+    port {
+      port        = 80
+      target_port = 80
+    }
+
+    type = "ClusterIP"
+  }
+}
+
+resource "kubernetes_ingress_v1" "nginx_ingress" {
+  metadata {
+    name = "sample-web-ingress"
+  }
+
+  spec {
+    ingress_class_name = "azure-alb-external"
+
+    rule {
+      http {
+        path {
+          path      = "/"
+          path_type = "Prefix"
+
+          backend {
+            service {
+              name = kubernetes_service.nginx.metadata[0].name
+
+              port {
+                number = 80
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }

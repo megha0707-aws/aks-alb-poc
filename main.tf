@@ -57,8 +57,9 @@ resource "kubernetes_ingress_v1" "nginx_ingress" {
     name = "sample-web-ingress"
 
     annotations = {
-      "alb.networking.azure.io/alb-id" = "/subscriptions/91ea5a42-5e9b-4c0c-a766-ea2a2aaa3ace/resourceGroups/rg-alb-poc/providers/Microsoft.ServiceNetworking/trafficControllers/alb-poc"
-    }
+  "alb.networking.azure.io/alb-id"         = "/subscriptions/91ea5a42-5e9b-4c0c-a766-ea2a2aaa3ace/resourceGroups/rg-alb-poc/providers/Microsoft.ServiceNetworking/trafficControllers/alb-poc"
+  "alb.networking.azure.io/frontend-name" = "public-frontend"
+}
   }
 
   spec {

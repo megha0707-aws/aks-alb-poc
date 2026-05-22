@@ -10,7 +10,7 @@ vnet_address_space = [
 aks_subnet_name = "aks-subnet"
 
 aks_subnet_prefix = [
-  "10.0.1.0/22"
+  "10.0.0.0/22"
 ]
 
 alb_subnet_name = "alb-subnet"
